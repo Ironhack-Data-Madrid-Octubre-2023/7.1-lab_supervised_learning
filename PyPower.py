@@ -2,6 +2,7 @@ from sys import displayhook
 import pandas as pd
 import seaborn as sns
 import numpy as np
+import matplotlib.pylab as plt
 
 
 # DATA CLEANING
@@ -125,55 +126,35 @@ def change_type(df, column, type_from, type_to):
     return df
 
 
-
-# PROCESSING DATAFRAMES
-
-def new_table(df_from, column_to_check, create_id, id_column_name, column_name,  id_list=[]):
+# Heatmap
+def plot_corr(df, fuente):
 
     """
-    Function to create a new dataframe by creating a list of unique values 
-    from df_from[column_to_check] and in case create_id is True, creates a 
-    list of consecutive values for id, otherwise assigns the ids from id_list
+    Función de clase   
     
     """
-    #Read the values of the column_to_check
-    data=[]
 
-    for e in df_from[column_to_check]:
-        if e not in data:
-            data.append(e)
+    plt.plot(figsize=(15, 10))   
+
+    sns.set(style='white')   
+
+    mask=np.triu(np.ones_like(df.corr(numeric_only=True), dtype=bool))    # mascara para tapar lo de arriba
+
+    cmap=sns.diverging_palette(0, 10, as_cmap=True)   # paleta de  colores
+
+
+    ax =sns.heatmap(df.corr(numeric_only=True),    
+            mask=mask,
+            cmap=cmap,
+            center=0,
+            square=True,
+            annot=True,
+            annot_kws={'size': fuente},  # Ajusta el tamaño del texto de annot
+            linewidths=0.5,
+            cbar_kws={'shrink': 0.5});
     
+    # Ajusta el tamaño de la fuente de los ejes x e y
+    ax.tick_params(axis='x', labelsize=fuente)
+    ax.tick_params(axis='y', labelsize=fuente)
 
-    #If create_id then create a list of consecutive values for the id
-    if create_id:
-        ids=[]
-
-        for e in range(len(data)):
-            ids.append(str(e+1))
-
-    elif not create_id:
-        ids= id_list
-
-    #Create a dictionary with both lists
-    dict_temp= {id_column_name: ids, column_name: data}
-
-    return pd.DataFrame(dict_temp)
-
-
-
-#So proud of this function :D
-def fill_column(row, df_to_compare, column_to_compare, column_to_change):
-
-    """
-    
-    
-    """
-    
-    if row[column_to_compare] in df_to_compare[column_to_compare].values:
-        
-        matching_row = df_to_compare[df_to_compare[column_to_compare] == row[column_to_compare]]
-        
-        row[column_to_change] = matching_row[column_to_change].values[0]
-
-    return row
-
+    plt.show()
